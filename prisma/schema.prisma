@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id            Int         @id @default(autoincrement())
+  name          String      
+  description   String      
+  price         Int         
+  image_url     String      
+  row_status    RowStatus   @default(ACTIVE)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  created_by    String      @default("SYSTEM")
+  updated_by    String?
+  order_detail  OrderDetail[]
+}
+
+model Customer {
+  id            Int         @id @default(autoincrement())
+  name          String      
+  row_status    RowStatus   @default(ACTIVE)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  created_by    String      @default("SYSTEM")
+  updated_by    String?
+  order         Order[]
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  customer_id   Int         
+  total_price   Int         
+  row_status    RowStatus   @default(ACTIVE)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  created_by    String      @default("SYSTEM")
+  updated_by    String?
+  order_detail  OrderDetail[]
+  customer      Customer    @relation(fields: [customer_id], references: [id])
+}
+
+model OrderDetail {
+  id              Int         @id @default(autoincrement())
+  order_id        Int         
+  product_id      Int         
+  sub_total       Int           
+  row_status      RowStatus   @default(ACTIVE)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  created_by      String      @default("SYSTEM")
+  updated_by      String?
+  order           Order       @relation(fields: [order_id], references: [id])
+  product         Product     @relation(fields: [product_id], references: [id])
+}
+
+enum RowStatus {
+  ACTIVE
+  DELETED
+}
