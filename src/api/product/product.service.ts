@@ -1,6 +1,5 @@
 import { resultStatus } from './../../helper/resultStatus';
 import { Injectable } from '@nestjs/common';
-import { BadRequestException } from '@nestjs/common/exceptions';
 import { RowStatus } from '@prisma/client';
 import { PrismaService } from 'src/providers/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -12,134 +11,133 @@ export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createProductDto: CreateProductDto) {
-    try{
+    try {
       const product = await this.prisma.product.create({
-        data:{
+        data: {
           name: createProductDto.name,
           description: createProductDto.description,
           price: createProductDto.price,
           image_url: createProductDto.image_url,
-          created_by: "ADMIN",
-          updated_by: "ADMIN"
-        }
-      })
-      return resultStatus("Success Creating Product!", true, product);
-    }
-    catch(error){
-      return resultStatus("Failed Creating Product!", false, error);
+          created_by: 'ADMIN',
+          updated_by: 'ADMIN',
+        },
+      });
+      return resultStatus('Success Creating Product!', true, product);
+    } catch (error) {
+      return resultStatus('Failed Creating Product!', false, error);
     }
   }
 
-  async checkProduct(createProductDto: CreateProductDto){
-    let queryFilter = {
+  async checkProduct(createProductDto: CreateProductDto) {
+    const queryFilter = {
       name: createProductDto.name,
       description: createProductDto.description,
-      row_status: RowStatus.ACTIVE
-    }
+      row_status: RowStatus.ACTIVE,
+    };
 
-    try{
+    try {
       const product = await this.prisma.product.findFirst({
-        where: queryFilter
+        where: queryFilter,
       });
-      if(product){
-        return resultStatus("Produc with same name and description already exists!", false);
+      if (product) {
+        return resultStatus(
+          'Produc with same name and description already exists!',
+          false,
+        );
       }
+    } catch (error) {
+      return resultStatus('Failed Finding Products!', false, error);
     }
-    catch(error){
-      return resultStatus("Failed Finding Products!", false, error);
-    }
-    return resultStatus("Product is unique", true);
+    return resultStatus('Product is unique', true);
   }
 
   async findAll(filter?: ProductQueryString) {
-    let queryFilter = {
-      row_status: RowStatus.ACTIVE
+    const queryFilter = {
+      row_status: RowStatus.ACTIVE,
+    };
+    console.log(filter);
+    if (filter) {
+      if (filter.name) queryFilter['name'] = { contains: filter.name };
+      if (filter.description)
+        queryFilter['description'] = { contains: filter.description };
+      if (filter.priceRangeStart)
+        queryFilter['price'] = { gte: +filter.priceRangeStart };
+      if (filter.priceRangeEnd)
+        queryFilter['price'] = { lte: +filter.priceRangeEnd };
     }
-    console.log(filter)
-    if(filter) {
-      if(filter.name) queryFilter["name"] = {contains: filter.name}
-      if(filter.description) queryFilter["description"] = {contains: filter.description}
-      if(filter.priceRangeStart) queryFilter["price"] = {gte: +filter.priceRangeStart } 
-      if(filter.priceRangeEnd) queryFilter["price"] = {lte: +filter.priceRangeEnd}
-    }
-    console.log(queryFilter)
-    try{
+    console.log(queryFilter);
+    try {
       const products = await this.prisma.product.findMany({
-        where: queryFilter
+        where: queryFilter,
       });
-      if(products.length === 0){
-        return resultStatus("Products is empty!", false);
+      if (products.length === 0) {
+        return resultStatus('Products is empty!', false);
       }
-      return resultStatus("Success Finding Products!", true, products);
-    }
-    catch(error){
+      return resultStatus('Success Finding Products!', true, products);
+    } catch (error) {
       console.log(error);
-      return resultStatus("Failed Finding Products!", false, error);
+      return resultStatus('Failed Finding Products!', false, error);
     }
   }
 
   async findOne(id: number) {
-    let queryFilter = {
+    const queryFilter = {
       row_status: RowStatus.ACTIVE,
-      id: id
-    }
-    try{
+      id: id,
+    };
+    try {
       const product = await this.prisma.product.findFirst({
-        where: queryFilter
+        where: queryFilter,
       });
-      if(!product){
-        return resultStatus("Products not found!", false);
+      if (!product) {
+        return resultStatus('Products not found!', false);
       }
-      return resultStatus("Success Finding Product By Id!", true, product);
-    }
-    catch(error){
-      return resultStatus("Failed Finding Product By Id!", false, error);
+      return resultStatus('Success Finding Product By Id!', true, product);
+    } catch (error) {
+      return resultStatus('Failed Finding Product By Id!', false, error);
     }
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-    try{
+    try {
       const updatedProduct = await this.prisma.product.update({
-        where: {id: id},
-        data:{
+        where: { id: id },
+        data: {
           price: updateProductDto.price,
           name: updateProductDto.name,
           description: updateProductDto.description,
-          updated_by: "ADMIN"
-        }
-      })
-      return resultStatus("Success Updating Product!", true, updatedProduct);
-    }
-    catch(error){
-      return resultStatus("Failed Updating Products!", false, error);
+          updated_by: 'ADMIN',
+        },
+      });
+      return resultStatus('Success Updating Product!', true, updatedProduct);
+    } catch (error) {
+      return resultStatus('Failed Updating Products!', false, error);
     }
   }
 
   async softDelete(id: number) {
-    try{
+    try {
       const deletedProduct = await this.prisma.product.update({
-        where: {id: id},
-        data:{
+        where: { id: id },
+        data: {
           row_status: RowStatus.DELETED,
-          updated_by: "ADMIN"
-        }
-      })
-      return resultStatus("Success Deleting Product!", true, deletedProduct);
-    }
-    catch(error){
-      return resultStatus("Failed Deleting Products!", false, error);
+          updated_by: 'ADMIN',
+        },
+      });
+      return resultStatus('Success Deleting Product!', true, deletedProduct);
+    } catch (error) {
+      return resultStatus('Failed Deleting Products!', false, error);
     }
   }
 
   async hardDelete(id: number) {
-    try{
+    try {
       const deletedProduct = await this.prisma.product.delete({
-        where: {id: id},
-      })
-      return resultStatus("Success Deleting Product!", true, deletedProduct);
-    }
-    catch(error){
-      return resultStatus("Failed Deleting Products!", false, error);
+        where: { id: id },
+      });
+      return resultStatus('Success Deleting Product!', true, deletedProduct);
+    } catch (error) {
+      return resultStatus('Failed Deleting Products!', false, error);
     }
   }
 }

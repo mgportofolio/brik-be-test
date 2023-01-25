@@ -51,7 +51,8 @@ model Order {
 model OrderDetail {
   id              Int         @id @default(autoincrement())
   order_id        Int         
-  product_id      Int         
+  product_id      Int
+  qty             Int         @default(1)   
   sub_total       Int           
   row_status      RowStatus   @default(ACTIVE)
   created_at      DateTime    @default(now())

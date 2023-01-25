@@ -1,8 +1,13 @@
-export const response = (status?: number, message?: string, success?: boolean, data?: any) => ({
+export const response = (
+  status?: number,
+  message?: any,
+  success?: boolean,
+  data?: any,
+) => ({
   meta: {
-    message: message || "Ok",
+    message: message || 'Ok',
     status: status || 200,
-    success: success || true
+    success: success || true,
   },
   data,
 });

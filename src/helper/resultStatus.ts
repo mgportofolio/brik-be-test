@@ -1,7 +1,7 @@
-export const resultStatus = (message?: string, success?: boolean, data?: any) => ({
+export const resultStatus = (message?: any, success?: boolean, data?: any) => ({
   meta: {
-    message: message || "Ok",
-    success: success || true
+    message: message || 'Ok',
+    success: success ?? true,
   },
   data,
 });
